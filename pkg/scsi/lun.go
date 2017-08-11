@@ -19,6 +19,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/gostor/gotgt/pkg/api"
 )
 
@@ -84,6 +85,7 @@ func GetReservation(dev *api.SCSILu, nexusID uint64) *api.SCSIReservation {
 
 func luPerformCommand(tid int, cmd *api.SCSICommand) api.SAMStat {
 	op := int(cmd.SCB[0])
+	logrus.Infof("scsi op :0x%x", op)
 	fn := cmd.Device.DeviceProtocol.PerformCommand(op)
 	if fn != nil {
 		fnop := fn.(SCSIDeviceOperation)

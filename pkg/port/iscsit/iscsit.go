@@ -30,15 +30,15 @@ const iSCSIDriverName = "iscsi"
 const (
 	IOSTATE_FREE = iota
 
-	IOSTATE_RX_BHS
+	IOSTATE_RX_BHS // Basic Header Segment 48byte
 	IOSTATE_RX_INIT_AHS
-	IOSTATE_RX_AHS
+	IOSTATE_RX_AHS // Additional Header Segment (optional)
 	IOSTATE_RX_INIT_HDIGEST
-	IOSTATE_RX_HDIGEST
+	IOSTATE_RX_HDIGEST // Header-Digest (optional)
 	IOSTATE_RX_CHECK_HDIGEST
 	IOSTATE_RX_INIT_DATA
-	IOSTATE_RX_DATA
-	IOSTATE_RX_INIT_DDIGEST
+	IOSTATE_RX_DATA // Data Segment (optional)
+	IOSTATE_RX_INIT_DDIGEST // Data-Digest (optional)
 	IOSTATE_RX_DDIGEST
 	IOSTATE_RX_CHECK_DDIGEST
 	IOSTATE_RX_END
@@ -72,6 +72,7 @@ type ISCSIRedirectInfo struct {
 	Callback string
 }
 
+// TPGT:Target Portal Group Tag
 type iSCSITPGT struct {
 	// Mapping to SCSI Reltive Target Port ID
 	TPGT    uint16

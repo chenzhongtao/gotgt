@@ -112,7 +112,7 @@ type ISCSIPortalInfo struct {
 }
 
 type ISCSITarget struct {
-	TPGTs map[string][]uint64 `json:"tpgts"`
+	TPGTs map[string][]uint64 `json:"tpgts"`  //Target Portal Group Tag
 	LUNs  map[string]uint64   `json:"luns"`
 }
 

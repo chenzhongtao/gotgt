@@ -40,7 +40,7 @@ type ISCSITargetDriver struct {
 	SCSI          *scsi.SCSITargetService
 	Name          string
 	iSCSITargets  map[string]*ISCSITarget
-	TSIHPool      map[uint16]bool
+	TSIHPool      map[uint16]bool //TSIH: Target Session Identifying Handle
 	TSIHPoolMutex sync.Mutex
 }
 
@@ -245,12 +245,14 @@ func (s *ISCSITargetDriver) rxHandler(conn *iscsiConnection) {
 			}
 			final = true
 		case IOSTATE_RX_INIT_AHS:
+			log.Debug("rx handler: IOSTATE_RX_INIT_AHS")
 			conn.rxIOState = IOSTATE_RX_DATA
 			break
 			if hdigest != 0 {
 				conn.rxIOState = IOSTATE_RX_INIT_HDIGEST
 			}
 		case IOSTATE_RX_DATA:
+			log.Debug("rx handler: IOSTATE_RX_DATA")
 			if ddigest != 0 {
 				conn.rxIOState = IOSTATE_RX_INIT_DDIGEST
 			}
@@ -292,20 +294,20 @@ func (s *ISCSITargetDriver) rxHandler(conn *iscsiConnection) {
 		conn.resp = &ISCSICommand{}
 		switch conn.req.OpCode {
 		case OpLoginReq:
-			log.Debug("OpLoginReq")
+			log.Debug("rx handler: OpLoginReq")
 			if err := s.iscsiExecLogin(conn); err != nil {
 				log.Error(err)
 				log.Warningf("set connection to close")
 				conn.state = CONN_STATE_CLOSE
 			}
 		case OpLogoutReq:
-			log.Debug("OpLogoutReq")
+			log.Debug("rx handler: OpLogoutReq")
 			if err := iscsiExecLogout(conn); err != nil {
 				log.Warningf("set connection to close")
 				conn.state = CONN_STATE_CLOSE
 			}
 		case OpTextReq:
-			log.Debug("OpTextReq")
+			log.Debug("rx handler: OpTextReq")
 			if err := s.iscsiExecText(conn); err != nil {
 				log.Warningf("set connection to close")
 				conn.state = CONN_STATE_CLOSE
@@ -502,7 +504,7 @@ SendRemainingData:
 				conn.txIOState = IOSTATE_TX_INIT_DDIGEST
 			}
 		default:
-			log.Errorf("error %d %d\n", conn.state, conn.txIOState)
+			log.Errorf("error 0x%x 0x%x\n", conn.state, conn.txIOState)
 			return
 		}
 
@@ -517,7 +519,7 @@ SendRemainingData:
 		}
 	}
 
-	log.Debugf("connection state: %v", conn.State())
+	log.Debugf("connection state: %s", conn.State())
 	switch conn.state {
 	case CONN_STATE_CLOSE, CONN_STATE_EXIT:
 		conn.state = CONN_STATE_CLOSE
@@ -538,7 +540,7 @@ SendRemainingData:
 	case CONN_STATE_SCSI:
 		conn.txTask = nil
 	default:
-		log.Warnf("unexpected connection state: %v", conn.State())
+		log.Warnf("unexpected connection state: %s", conn.State())
 		conn.rxIOState = IOSTATE_RX_BHS
 		s.handler(DATAIN, conn)
 	}
@@ -546,6 +548,7 @@ SendRemainingData:
 
 func (s *ISCSITargetDriver) scsiCommandHandler(conn *iscsiConnection) (err error) {
 	req := conn.req
+	log.Debugf("scsiCommandHandler OpCode:0x%x", req.OpCode)
 	switch req.OpCode {
 	case OpSCSICmd:
 		log.Debugf("SCSI Command processing...")

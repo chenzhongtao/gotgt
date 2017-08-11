@@ -199,6 +199,7 @@ func (m *ISCSICommand) loginRespBytes() []byte {
 	if m.Cont {
 		b |= 0x40
 	}
+	// todo  0x03
 	b |= byte(m.CSG&0xff) << 2
 	b |= byte(m.NSG & 0xff)
 	// byte 1

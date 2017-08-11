@@ -22,6 +22,7 @@ import (
 	"sort"
 	"sync"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/gostor/gotgt/pkg/api"
 	"github.com/gostor/gotgt/pkg/util"
 )
@@ -153,6 +154,7 @@ func (conn *iscsiConnection) buildRespPackage(oc OpCode, task *iscsiTask) error 
 	if task == nil {
 		task = conn.rxTask
 	}
+	log.Infof("buildRespPackage OpCode:0x%x", oc)
 	conn.resp = &ISCSICommand{
 		StatSN:          conn.req.ExpStatSN,
 		TaskTag:         conn.req.TaskTag,
@@ -160,6 +162,7 @@ func (conn *iscsiConnection) buildRespPackage(oc OpCode, task *iscsiTask) error 
 		MaxCmdSN:        conn.session.ExpCmdSN + conn.session.MaxQueueCommand,
 		ExpectedDataLen: conn.req.ExpectedDataLen,
 	}
+
 	switch oc {
 	case OpReady:
 		conn.resp.OpCode = OpReady

@@ -27,6 +27,7 @@ import (
 
 type OpCode int
 
+// rfc7143 11.2.1.2
 const (
 	// Defined on the initiator.
 	OpNoopOut     OpCode = 0x00
@@ -84,6 +85,7 @@ type ISCSITaskManagementFunc struct {
 	ReferencedTaskTag uint32
 }
 
+// rfc7143 11.2.1
 type ISCSICommand struct {
 	OpCode             OpCode
 	RawHeader          []byte
@@ -213,6 +215,7 @@ func ParseUint(data []byte) uint64 {
 	return out
 }
 
+// rfc7143 11.2.1
 func parseHeader(data []byte) (*ISCSICommand, error) {
 	if len(data) != BHS_SIZE {
 		return nil, fmt.Errorf("garbled header")
@@ -225,6 +228,7 @@ func parseHeader(data []byte) (*ISCSICommand, error) {
 	m.AHSLen = int(data[4]) * 4
 	m.DataLen = int(ParseUint(data[5:8]))
 	m.TaskTag = uint32(ParseUint(data[16:20]))
+	log.Infof("parseHeader : OpCode 0x%x", m.OpCode)
 	switch m.OpCode {
 	case OpSCSICmd:
 		m.LUN = [8]byte{data[9]}
